@@ -1,0 +1,82 @@
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('Index')
+    .setTitle("Elvinson - Virtual Assistant")
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function getBotResponse(message) {
+  const msg = message.trim().toLowerCase();
+
+  // Predefined chatbot-style answers
+  const responses = {
+    "hi": "Hello! 😊 How can I help you today?",
+    "hello": "Hi there! 👋 Do you want to check a visa status?",
+    "good morning": "Good morning! ☀️ Hope you're having a great day!",
+    "good afternoon": "Good afternoon! How can I assist you?",
+    "good evening": "Good evening! 🌙 Need help with passport info?",
+    "how are you": "I'm doing great, thank you! How can I assist you today?",
+    "what is your name": "I'm Visa Office Assistant, your virtual helper! 🛂",
+    "who are you": "I'm a chatbot that helps check passport and visa details.",
+    "where are you from": "I'm hosted in the cloud. ☁️🌍",
+    "thank you": "You're welcome! Let me know if you need anything else. 😊"
+  };
+
+  if (responses[msg]) {
+    logChat(message, responses[msg]);
+    return responses[msg];
+  }
+
+  if (msg.length < 3) {
+    const reply = "Please type more information, like a name, ID or passport number.";
+    logChat(message, reply);
+    return reply;
+  }
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  const searchValue = msg.toLowerCase();
+  let results = [];
+
+  for (let sheet of sheets) {
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      for (let j = 0; j < row.length; j++) {
+        const cellValue = String(row[j]).toLowerCase();
+        if (cellValue.includes(searchValue)) {
+          const result = headers.map((h, idx) => `${h}: ${row[idx]}`).join('\n');
+          results.push(`📄 Sheet: "${sheet.getName()}"\n${result}`);
+          break; // Avoid duplicate entries from same row
+        }
+      }
+    }
+  }
+
+  if (results.length > 0) {
+    const combined = `✅ I found ${results.length} result(s):\n\n` + results.join('\n\n---\n\n');
+    logChat(message, combined);
+    return combined;
+  }
+
+  const notFound = "❌ Sorry, I couldn’t find any information related to that. Please check and try again.";
+  logChat(message, notFound);
+  return notFound;
+}
+
+
+function logChat(userMessage, botReply) {
+  const sheetName = 'Chat History';
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(['Timestamp', 'User Message', 'Bot Reply']);
+  }
+
+  const timestamp = new Date();
+  sheet.appendRow([timestamp, userMessage, botReply]);
+}
+
