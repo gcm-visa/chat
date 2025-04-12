@@ -1,8 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base target="_top">
+  <title>Visa Office Assistant</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #e8f5e9;
@@ -12,14 +19,13 @@
 
     .container {
       max-width: 600px;
-      margin: 30px auto;
+      margin: 0 auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
       background-color: #ffffff;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: 90vh;
     }
 
     .header {
@@ -50,7 +56,6 @@
     .user-msg {
       background-color: #c8e6c9;
       align-self: flex-end;
-      margin-left: auto;
     }
 
     .bot-msg {
@@ -62,13 +67,14 @@
     .input-area {
       display: flex;
       padding: 15px;
+      gap: 10px;
       border-top: 1px solid #c8e6c9;
       background-color: #ffffff;
     }
 
     input[type="text"] {
       flex: 1;
-      padding: 10px 12px;
+      padding: 10px;
       border: 1px solid #81c784;
       border-radius: 8px;
       font-size: 1rem;
@@ -76,7 +82,6 @@
     }
 
     button {
-      margin-left: 10px;
       padding: 10px 16px;
       background-color: #43a047;
       color: white;
@@ -84,10 +89,15 @@
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     button:hover {
       background-color: #388e3c;
+    }
+
+    .end-btn {
+      background-color: #d32f2f;
     }
 
     .footer {
@@ -108,6 +118,28 @@
       50% { opacity: 0.2; }
       100% { opacity: 1; }
     }
+
+    @media (max-width: 600px) {
+      .container {
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .input-area {
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      button {
+        width: 100%;
+        margin: 0;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -118,7 +150,7 @@
     <div class="input-area">
       <input type="text" id="input" placeholder="Type ID, name, or just say hi..." />
       <button onclick="sendMessage()">Send</button>
-      <button onclick="endChat()" style="background-color:#d32f2f;">End Chat</button>
+      <button class="end-btn" onclick="endChat()">End Chat</button>
     </div>
 
     <div class="footer">Developed by: Elvinson</div>
@@ -139,12 +171,12 @@
       idleTimer1 = setTimeout(() => {
         showBotMessage("Hey, are you still there? 😊");
         lastBotPrompt = "idle-check";
-      }, 60000); // 1 min
+      }, 60000);
 
       idleTimer2 = setTimeout(() => {
         showBotMessage("Looks like you're away for now. I'll end this chat. Talk soon! 👋");
         chatActive = false;
-      }, 90000); // 1.5 min
+      }, 90000);
     }
 
     function showBotMessage(msg) {
@@ -170,7 +202,6 @@
       chat.scrollTop = chat.scrollHeight;
       input.value = "";
 
-      // Respond to idle prompt
       if (lastBotPrompt === "idle-check" && /^yes\b/i.test(message)) {
         showBotMessage("Great! I'm here whenever you need me 😊");
         lastBotPrompt = "";
@@ -178,7 +209,6 @@
         return;
       }
 
-      // Typing animation
       const typingId = `typing-${Date.now()}`;
       chat.innerHTML += `<div class="bot-msg" id="${typingId}">Visa Office is typing<span class="dot">.</span></div>`;
       chat.scrollTop = chat.scrollHeight;
