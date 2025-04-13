@@ -215,13 +215,28 @@
       animateTypingDots(typingId);
       resetIdleTimers();
 
-      google.script.run.withSuccessHandler(function(response) {
+      fetch('https://script.google.com/macros/s/AKfycbxm_aj07nMlAnQCJ-yyXoa1P1QdWVGa2J5S_OIvpy2ff0UDEmy4oIiCEFF3WYMEzslc/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: message })
+      })
+      .then(response => response.text())
+      .then(data => {
         const typingElem = document.getElementById(typingId);
         if (typingElem) {
-          typingElem.outerHTML = `<div class="bot-msg">${response}</div>`;
+          typingElem.outerHTML = `<div class="bot-msg">${data}</div>`;
           chat.scrollTop = chat.scrollHeight;
         }
-      }).getBotResponse(message);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const typingElem = document.getElementById(typingId);
+        if (typingElem) {
+          typingElem.outerHTML = `<div class="bot-msg">Oops! Something went wrong. Please try again later.</div>`;
+        }
+      });
     }
 
     function endChat() {
@@ -236,7 +251,7 @@
       const interval = setInterval(() => {
         const el = document.getElementById(elementId);
         if (!el) return clearInterval(interval);
-        el.innerHTML = "Karen is typing" + ".".repeat(dots);
+        el.innerHTML = "Visa Office is typing" + ".".repeat(dots);
         dots = (dots % 3) + 1;
       }, 500);
     }
